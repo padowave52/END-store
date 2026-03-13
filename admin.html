@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>ADMIN - END STORE</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:40px;
+background:#f4f4f4;
+}
+
+h1{
+margin-bottom:20px;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+input,select{
+padding:6px;
+margin:4px;
+}
+
+button{
+padding:8px 14px;
+margin:5px;
+border:none;
+background:#222;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.product{
+border-bottom:1px solid #ddd;
+padding:10px 0;
+}
+
+textarea{
+width:100%;
+height:300px;
+margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<script>
+
+const PASSWORD="YEJI0906"
+
+const input=prompt("관리자 비밀번호")
+
+if(input!==PASSWORD){
+document.body.innerHTML="접근 불가"
+}
+
+</script>
+
+<h1>상품 관리자</h1>
+
+<div class="container">
+
+<button onclick="addProduct()">상품 추가</button>
+
+<div id="productList"></div>
+
+<h3>products.js 코드</h3>
+
+<button onclick="generate()">코드 생성</button>
+
+<button onclick="copyCode()">복사</button>
+
+<textarea id="output"></textarea>
+
+</div>
+
+<script>
+
+let products=[]
+
+function addProduct(){
+
+products.push({
+name:"",
+category:"게임웨어",
+original:0,
+discount:0,
+price:0,
+image:"",
+link:"",
+soldout:false,
+sizes:""
+})
+
+render()
+
+}
+
+function render(){
+
+let html=""
+
+products.forEach((p,i)=>{
+
+html+=`
+
+<div class="product">
+
+<input placeholder="상품명" value="${p.name}" onchange="products[${i}].name=this.value">
+
+<select onchange="products[${i}].category=this.value">
+
+<option>게임웨어</option>
+<option>데일리</option>
+<option>하의</option>
+<option>자켓</option>
+<option>라켓</option>
+<option>신발</option>
+<option>보호대</option>
+<option>가방</option>
+<option>양말</option>
+<option>그립</option>
+<option>타올</option>
+<option>밴드/타이</option>
+<option>기타용품</option>
+
+</select>
+
+<br>
+
+<input placeholder="정가" type="number" onchange="products[${i}].original=this.value">
+
+<input placeholder="할인율" type="number" onchange="products[${i}].discount=this.value">
+
+<input placeholder="판매가" type="number" onchange="products[${i}].price=this.value">
+
+<br>
+
+<input placeholder="이미지 링크" onchange="products[${i}].image=this.value">
+
+<br>
+
+<input placeholder="공홈 링크" onchange="products[${i}].link=this.value">
+
+<br>
+
+<input placeholder="사이즈 (예: 90,95,100)" onchange="products[${i}].sizes=this.value">
+
+<label>
+
+품절
+
+<input type="checkbox" onchange="products[${i}].soldout=this.checked">
+
+</label>
+
+<button onclick="removeProduct(${i})">삭제</button>
+
+</div>
+
+`
+
+})
+
+document.getElementById("productList").innerHTML=html
+
+}
+
+function removeProduct(i){
+
+products.splice(i,1)
+
+render()
+
+}
+
+function generate(){
+
+let output="const products = [\n"
+
+products.forEach(p=>{
+
+let sizes=p.sizes.split(",")
+
+let sizeArr=""
+
+sizes.forEach(s=>{
+
+if(s.trim()!==""){
+
+sizeArr+=`{size:"${s.trim()}",soldout:false},`
+
+}
+
+})
+
+output+=`
+{
+name:"${p.name}",
+category:"${p.category}",
+original:${p.original},
+discount:${p.discount},
+price:${p.price},
+image:"${p.image}",
+link:"${p.link}",
+soldout:${p.soldout},
+sizeSoldout:[${sizeArr}]
+},
+`
+
+})
+
+output+="]"
+
+document.getElementById("output").value=output
+
+}
+
+function copyCode(){
+
+let text=document.getElementById("output")
+
+text.select()
+
+document.execCommand("copy")
+
+alert("products.js 코드 복사 완료")
+
+}
+
+</script>
+
+</body>
+</html>

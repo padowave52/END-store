@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<title>END TECHNIST TEAM STORE</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:'Noto Sans KR', sans-serif;
+margin:0;
+background:#f4f4f4;
+}
+
+header{
+background:#111;
+color:white;
+padding:15px;
+font-size:22px;
+text-align:center;
+}
+
+.categoryBar{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+background:white;
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+.categoryBar button{
+margin:5px;
+padding:8px 12px;
+border:none;
+background:#222;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.container{
+display:grid;
+grid-template-columns:1fr 320px;
+}
+
+.main{
+padding:20px;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+gap:20px;
+}
+
+.product{
+background:white;
+padding:12px;
+border-radius:10px;
+text-align:center;
+}
+
+.product img{
+width:100%;
+}
+
+.original{
+text-decoration:line-through;
+color:#777;
+font-size:14px;
+}
+
+.sale{
+color:red;
+font-weight:bold;
+}
+
+.product select,
+.product input{
+width:80px;
+padding:5px;
+margin-top:6px;
+text-align:center;
+}
+
+.product button{
+width:100%;
+padding:7px;
+margin-top:6px;
+border:none;
+background:#222;
+color:white;
+cursor:pointer;
+border-radius:6px;
+}
+
+.cart{
+background:white;
+border-left:1px solid #ddd;
+height:100vh;
+overflow:auto;
+padding:10px;
+}
+
+.sizeSoldout{
+opacity:0.4;
+text-decoration:line-through;
+}
+
+.soldoutText{
+color:red;
+font-weight:bold;
+}
+
+.mobileCartBtn{
+display:none;
+position:fixed;
+bottom:20px;
+left:0;
+right:0;
+margin:auto;
+width:200px;
+background:#111;
+color:white;
+border:none;
+padding:12px;
+border-radius:20px;
+}
+
+.mobileCart{
+position:fixed;
+bottom:-100%;
+left:0;
+right:0;
+background:white;
+max-height:70vh;
+overflow:auto;
+transition:0.4s;
+padding:15px;
+}
+
+.mobileCart.open{
+bottom:0;
+}
+
+.mobileClose{
+width:100%;
+background:#111;
+color:white;
+border:none;
+padding:10px;
+margin-bottom:10px;
+}
+
+@media(max-width:768px){
+
+.container{
+grid-template-columns:1fr
+}
+
+.cart{
+display:none
+}
+
+.mobileCartBtn{
+display:block
+}
+
+.products{
+grid-template-columns:repeat(2,1fr)
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<script>
+
+const PASSWORD = "TEAMEND2026";   // 원하는 비밀번호
+
+const input = prompt("비밀번호를 입력하세요");
+
+if(input !== PASSWORD){
+    document.body.innerHTML = `
+        <div style="
+        height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-family:Noto Sans KR;
+        font-size:22px;">
+        접근 권한이 없습니다
+        </div>
+    `;
+}
+
+</script>
+
+
+<header>END TECHNIST TEAM STORE</header>
+
+<div class="categoryBar">
+
+<button onclick="filterCategory('게임웨어')">게임웨어</button>
+<button onclick="filterCategory('데일리')">데일리</button>
+<button onclick="filterCategory('하의')">하의</button>
+<button onclick="filterCategory('자켓')">자켓</button>
+<button onclick="filterCategory('라켓')">라켓</button>
+<button onclick="filterCategory('신발')">신발</button>
+<button onclick="filterCategory('보호대')">보호대</button>
+<button onclick="filterCategory('가방')">가방</button>
+<button onclick="filterCategory('양말')">양말</button>
+<button onclick="filterCategory('그립')">그립</button>
+<button onclick="filterCategory('타올')">타올</button>
+<button onclick="filterCategory('밴드/타이')">밴드/타이</button>
+<button onclick="filterCategory('기타용품')">기타용품</button>
+
+</div>
+
+<div class="container">
+
+<div class="main">
+<div id="productList" class="products"></div>
+</div>
+
+<div class="cart">
+
+<h3>주문자 이름</h3>
+<input id="buyer">
+
+<h3>장바구니</h3>
+<div id="cartItems"></div>
+
+<h3>총 금액</h3>
+<h2><span id="total">0</span>원</h2>
+
+<button onclick="copyOrder()">주문서 복사</button>
+
+</div>
+
+</div>
+
+<button class="mobileCartBtn" onclick="toggleCart()">장바구니 보기</button>
+
+<div class="mobileCart" id="mobileCart">
+
+<button class="mobileClose" onclick="toggleCart()">상품보기</button>
+
+<h3>주문자 이름</h3>
+<input id="buyerMobile">
+
+<h3>장바구니</h3>
+<div id="mobileCartItems"></div>
+
+<h3>총 금액</h3>
+<h2><span id="totalMobile">0</span>원</h2>
+
+<button onclick="copyOrder()">주문서 복사</button>
+
+</div>
+
+<script src="products.js"></script>
+
+<script>
+
+let cart=[]
+
+function renderProducts(list){
+
+let html=""
+
+list.forEach((p,i)=>{
+
+let realIndex = products.indexOf(p)
+
+let sizeHTML=""
+
+if(p.sizeSoldout){
+
+sizeHTML="<select id='size-"+i+"'>"
+
+p.sizeSoldout.forEach(s=>{
+
+sizeHTML+=`<option ${s.soldout?'disabled':''} class="${s.soldout?'sizeSoldout':''}">
+${s.size}${s.soldout?' (품절)':''}
+</option>`
+
+})
+
+sizeHTML+="</select>"
+
+}
+
+html+=`
+
+<div class="product">
+
+<img src="${p.image}">
+<h4>${p.name}</h4>
+
+<p class="original">${p.original.toLocaleString()}원</p>
+<p class="sale">${p.discount}% ${p.price.toLocaleString()}원</p>
+
+${sizeHTML}
+
+${p.soldout?'<div class="soldoutText">품절</div>':
+
+`<input id="qty-${i}" type="number" value="1" min="1">
+<button onclick="addCart(${realIndex},${i})">장바구니 담기</button>`}
+
+<a href="${p.link}" target="_blank"><button>공홈 이동</button></a>
+
+</div>
+`
+
+})
+
+document.getElementById("productList").innerHTML=html
+
+}
+
+function filterCategory(cat){
+
+renderProducts(products.filter(p=>p.category===cat))
+
+}
+
+function addCart(realIndex,i){
+
+let size=""
+
+let sizeEl=document.getElementById("size-"+i)
+if(sizeEl) size=sizeEl.value
+
+let qty=parseInt(document.getElementById("qty-"+i).value)
+
+if(!qty || qty<1) qty=1
+
+let item = {...products[realIndex],size,qty}
+
+cart.push(item)
+
+renderCart()
+
+}
+
+function renderCart(){
+
+let html=""
+
+cart.forEach((item,i)=>{
+
+let sum=item.price*item.qty
+
+html+=`
+
+<div>
+
+<input type="checkbox" data-index="${i}" checked onchange="updateTotal()">
+
+${item.name} ${item.size} ${item.qty}개
+
+${sum.toLocaleString()}원
+
+<button onclick="removeCart(${i})">삭제</button>
+
+</div>
+
+`
+
+})
+
+document.getElementById("cartItems").innerHTML=html
+document.getElementById("mobileCartItems").innerHTML=html
+
+updateTotal()
+
+}
+
+function removeCart(i){
+
+cart.splice(i,1)
+
+renderCart()
+
+}
+
+function updateTotal(){
+
+let total=0
+
+document.querySelectorAll("#cartItems input[type=checkbox]").forEach(c=>{
+
+if(c.checked){
+
+let i=c.dataset.index
+
+let item=cart[i]
+
+if(item) total+=item.price*item.qty
+
+}
+
+})
+
+document.getElementById("total").innerText=total.toLocaleString()
+document.getElementById("totalMobile").innerText=total.toLocaleString()
+
+}
+
+function copyOrder(){
+
+let name=document.getElementById("buyer").value || document.getElementById("buyerMobile").value
+
+let total=document.getElementById("total").innerText
+
+let text="주문자: "+name+"\n\n"
+
+document.querySelectorAll("#cartItems input[type=checkbox]").forEach(c=>{
+
+if(c.checked){
+
+let i=c.dataset.index
+
+let item=cart[i]
+
+if(item){
+
+text+=`${item.name} ${item.size} ${item.qty}개\n`
+
+}
+
+}
+
+})
+
+text+="\n총 금액: "+total+"원"
+
+navigator.clipboard.writeText(text)
+
+alert("주문서 복사 완료")
+
+}
+
+function toggleCart(){
+
+document.getElementById("mobileCart").classList.toggle("open")
+
+}
+
+filterCategory("게임웨어")
+
+</script>
+
+</body>
+</html>
